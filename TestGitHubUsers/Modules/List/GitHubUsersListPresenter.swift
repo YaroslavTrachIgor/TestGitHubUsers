@@ -7,6 +7,20 @@
 
 import Foundation
 
+//MARK: - Constants
+private extension GitHubUsersListPresenter {
+    
+    //MARK: Private
+    enum Constants {
+        enum ErrorMessage {
+            
+            //MARK: Static
+            static let basicMessage = "Error fetching GitHub Users Data:"
+        }
+    }
+}
+
+
 //MARK: - Presenter protocol
 protocol GitHubUsersListPresenterProtocol {
     func onViewDidLoad(completion: @escaping (([GitHubUserCellUIModel]) -> ()))
@@ -56,6 +70,7 @@ final class GitHubUsersListPresenter: GitHubUsersListPresenterProtocol {
     }
 }
 
+
 //MARK: - Main methods
 private extension GitHubUsersListPresenter {
     
@@ -68,14 +83,9 @@ private extension GitHubUsersListPresenter {
                 DispatchQueue.main.async {
                     completion(dbModels ?? [])
                 }
-            } catch APIError.ACRequestError.invalidDataError {
-                showError(with: "Invalid Data Error.")
-            } catch APIError.ACRequestError.invalidURLError {
-                showError(with: "Invalid URL Error.")
-            } catch APIError.ACRequestError.sessionError {
-                showError(with: "Session Error.")
             } catch {
-                showError(with: "Unexpected Error. Check your Wi-Fi connection.")
+                print(Constants.ErrorMessage.basicMessage)
+                print(error)
             }
         }
     }

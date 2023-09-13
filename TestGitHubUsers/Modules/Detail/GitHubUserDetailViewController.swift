@@ -7,14 +7,34 @@
 
 import UIKit
 
+//MARK: - Constants
+private extension GitHubUserDetailViewController {
+    
+    //MARK: Private
+    enum Constants {
+        enum UI {
+            enum Label {
+                
+                //MARK: Static
+                static let baseNoEmailPhrase = "No Email"
+                static let baseNofFollowersPrefix =  "# of Followers: "
+                static let baseNofFollowingPrefix = "# of Following: "
+            }
+        }
+    }
+}
+
+
 //MARK: - ViewController protocol
 protocol GitHubUserDetailViewControllerProtocol {
     func show(uiModel: DetailGitHubUserCellUIModel)
 }
 
+
 //MARK: - Main ViewController
 final class GitHubUserDetailViewController: UIViewController, GitHubUserDetailViewControllerProtocol {
 
+    //MARK: Public
     var presenter: GitHubUserDetailPresenterProtocol?
     
     //MARK: @IBOutlets
@@ -34,11 +54,9 @@ final class GitHubUserDetailViewController: UIViewController, GitHubUserDetailVi
     //MARK: View Controller protocol
     func show(uiModel: DetailGitHubUserCellUIModel) {
         titleLabel.text = uiModel.login
-        emailLabel.text = uiModel.email ?? "No Email"
-        followersLabel.text = "# of Followers: " + String(uiModel.followers ?? 0)
-        followingLabel.text = "# of Followings: " + String(uiModel.following ?? 0)
+        emailLabel.text = uiModel.email ?? Constants.UI.Label.baseNoEmailPhrase
+        followersLabel.text = Constants.UI.Label.baseNofFollowersPrefix + String(uiModel.followers ?? 0)
+        followingLabel.text = Constants.UI.Label.baseNofFollowingPrefix + String(uiModel.following ?? 0)
         avatarIconImageView.downloadImage(with: uiModel.avatarURL)
     }
 }
-
-

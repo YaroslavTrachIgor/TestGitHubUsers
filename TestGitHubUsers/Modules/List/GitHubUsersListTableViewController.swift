@@ -8,6 +8,35 @@
 import Foundation
 import UIKit
 
+//MARK: - Constants
+private extension GitHubUsersListTableViewController {
+    
+    //MARK: Private
+    enum Constants {
+        enum UI {
+            enum NavigationItem {
+                
+                //MARK: Static
+                static let title = "GitHub Users"
+            }
+            enum AlertController {
+                enum ErrorAlert {
+                    
+                    //MARK: Static
+                    static let title = "Error"
+                    static let okAction = "OK"
+                }
+            }
+            enum RefreshControl {
+                
+                //MARK: Static
+                static let title = "Pull to refresh"
+            }
+        }
+    }
+}
+
+
 //MARK: - ViewController protocol
 protocol GitHubUsersListTableViewControllerProtocol {
     func setupMainUI()
@@ -18,13 +47,15 @@ protocol GitHubUsersListTableViewControllerProtocol {
 
 
 //MARK: - Main ViewController
-final class GitHubUsersListTableViewController: UITableViewController, GitHubUsersListTableViewControllerProtocol {
-        
+final class GitHubUsersListTableViewController: UITableViewController {
+      
+    //MARK: Public
     var presenter: GitHubUsersListPresenterProtocol?
     
     //MARK: Private
     private var rows = [GitHubUserCellUIModel]()
     private let refreshUsersControl = UIRefreshControl()
+    
     
     //MARK: Lifecycle
     override func viewDidLoad() {
@@ -35,42 +66,12 @@ final class GitHubUsersListTableViewController: UITableViewController, GitHubUse
         })
     }
     
-    //MARK: ViewController protocol
-    func setupMainUI() {
-        title = "GitHub Users"
-        
-        view.backgroundColor = .systemGroupedBackground
-        
-        let cellKey = String(describing: GitHubUsersListTableViewCell.self)
-        tableView.register(UINib(nibName: cellKey, bundle: nil), forCellReuseIdentifier: cellKey)
-        tableView.rowHeight = 85
-        
-        refreshUsersControl.attributedTitle = NSAttributedString(string: "Pull to refresh")
-        refreshUsersControl.addTarget(self, action: #selector(refresh), for: .valueChanged)
-        tableView.refreshControl = refreshUsersControl
-    }
-    
-    func endRefreshingAnimation() {
-        refreshUsersControl.endRefreshing()
-    }
-    
-    func presentErrorAlertVC(message: String) {
-        let alertVC = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
-        let okAction = UIAlertAction(title: "OK", style: .cancel)
-        alertVC.addAction(okAction)
-        present(alertVC, animated: true)
-    }
-    
-    func refreshTableView() {
-        tableView.reloadData()
-    }
-    
     //MARK: @objc
     @objc func refresh() {
         presenter?.onRefresh()
     }
     
-    //MARK: TableView Data Source protocol
+    //MARK: TableView DataSource protocol
     override func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
@@ -89,5 +90,55 @@ final class GitHubUsersListTableViewController: UITableViewController, GitHubUse
         let row = rows[indexPath.row]
         let cell = tableView.dequeueReusableCell(withModel: row, indexPath: indexPath)
         return cell
+    }
+}
+
+
+//MARK: - ViewController protocol extension
+extension GitHubUsersListTableViewController: GitHubUsersListTableViewControllerProtocol {
+    
+    //MARK: Internal
+    func setupMainUI() {
+        title = Constants.UI.NavigationItem.title
+        view.backgroundColor = .systemGroupedBackground
+        setupTableView()
+        setupRefreshUsersControl()
+    }
+    
+    func endRefreshingAnimation() {
+        refreshUsersControl.endRefreshing()
+    }
+    
+    func presentErrorAlertVC(message: String) {
+        let title = Constants.UI.AlertController.ErrorAlert.title
+        let okActiontitle = Constants.UI.AlertController.ErrorAlert.okAction
+        let alertVC = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        let okAction = UIAlertAction(title: okActiontitle, style: .cancel)
+        alertVC.addAction(okAction)
+        present(alertVC, animated: true)
+    }
+    
+    func refreshTableView() {
+        tableView.reloadData()
+    }
+}
+
+
+//MARK: - Main methods
+private extension GitHubUsersListTableViewController {
+    
+    //MARK: Private
+    func setupTableView() {
+        let cellKey = String(describing: GitHubUsersListTableViewCell.self)
+        let cellNib = UINib(nibName: cellKey, bundle: nil)
+        tableView.register(cellNib, forCellReuseIdentifier: cellKey)
+        tableView.rowHeight = 85
+    }
+    
+    func setupRefreshUsersControl() {
+        let title = Constants.UI.RefreshControl.title
+        refreshUsersControl.attributedTitle = NSAttributedString(string: title)
+        refreshUsersControl.addTarget(self, action: #selector(refresh), for: .valueChanged)
+        tableView.refreshControl = refreshUsersControl
     }
 }
