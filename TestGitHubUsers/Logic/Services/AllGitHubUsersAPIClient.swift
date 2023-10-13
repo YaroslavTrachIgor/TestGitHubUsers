@@ -9,6 +9,7 @@ import Foundation
 
 //MARK: - GitHub Users API client protocol
 protocol AllGitHubUsersAPIClientProtocol {
+    func update(with url: URL!)
     func getUsers() async throws -> [GitHubUserDB]?
 }
 
@@ -17,6 +18,10 @@ protocol AllGitHubUsersAPIClientProtocol {
 final class AllGitHubUsersAPIClient: APIHelper, AllGitHubUsersAPIClientProtocol {
     
     //MARK: Internal
+    override func update(with url: URL!) {
+        super.update(with: url)
+    }
+    
     func getUsers() async throws -> [GitHubUserDB]? {
         do {
             let data = try await self.get()

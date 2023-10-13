@@ -27,6 +27,7 @@ typealias APIGetRequestCompletionHandler = ((Result<Data, APIError.ACRequestErro
 //MARK: - API Helper protocol
 protocol APIHelperProtocol {
     init(url: URL?)
+    func update(with url: URL?)
     func get() async throws -> Data
 }
 
@@ -48,6 +49,10 @@ public class APIHelper: APIHelperProtocol {
     }
     
     //MARK: Internal
+    func update(with url: URL?) {
+        self.url = url
+    }
+    
     /// This creates a simple `GET` URL request.
     /// - Parameter completion: gives opportunity to work in `APIClients` with content of different `Codable` models in the future.
     func get() async throws -> Data {

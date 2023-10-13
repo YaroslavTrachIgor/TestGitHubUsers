@@ -13,10 +13,12 @@ final class DetailGitHubUsersListFormatter {
     //MARK: Static
     static func format(_ dbModel: DetailGitHubUserDB) -> DetailGitHubUserCellUIModel {
         return DetailGitHubUserCellUIModel(login: dbModel.login,
-                                           email: dbModel.email,
+                                           url: dbModel.url,
                                            avatarURL: URL(string: dbModel.avatar_url),
-                                           followers: dbModel.followers,
-                                           following: dbModel.following)
+                                           followers: String(dbModel.followers),
+                                           following: String(dbModel.following),
+                                           gists: String(dbModel.public_gists)
+        )
     }
 }
 

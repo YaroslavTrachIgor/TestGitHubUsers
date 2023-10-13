@@ -42,6 +42,7 @@ protocol GitHubUsersListTableViewControllerProtocol {
     func setupMainUI()
     func refreshTableView()
     func endRefreshingAnimation()
+    func updateRows(with rows: [GitHubUserCellUIModel])
     func presentErrorAlertVC(message: String)
 }
 
@@ -54,16 +55,26 @@ final class GitHubUsersListTableViewController: UITableViewController {
     
     //MARK: Private
     private var rows = [GitHubUserCellUIModel]()
+    private var filteredRows = [GitHubUserCellUIModel]()
+    private var currentRows: [GitHubUserCellUIModel]! {
+        if isSearchBarActive {
+            return filteredRows
+        } else {
+            return rows
+        }
+    }
     private let refreshUsersControl = UIRefreshControl()
+    private var searchController: UISearchController!
+    private var isSearchBarActive: Bool {
+        return searchController.isActive && !searchController.searchBar.text!.isEmpty
+    }
     
     
     //MARK: Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        presenter?.onViewDidLoad(completion: { rows in
-            self.rows = rows
-        })
+        presenter?.onViewDidLoad()
     }
     
     //MARK: @objc
@@ -77,17 +88,17 @@ final class GitHubUsersListTableViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return rows.count
+        return currentRows.count
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let row = rows[indexPath.row]
+        let row = currentRows[indexPath.row]
         let login = row.login
         presenter?.onDidSelectRow(with: login!)
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let row = rows[indexPath.row]
+        let row = currentRows[indexPath.row]
         let cell = tableView.dequeueReusableCell(withModel: row, indexPath: indexPath)
         return cell
     }
@@ -101,8 +112,14 @@ extension GitHubUsersListTableViewController: GitHubUsersListTableViewController
     func setupMainUI() {
         title = Constants.UI.NavigationItem.title
         view.backgroundColor = .systemGroupedBackground
+        navigationController?.navigationBar.prefersLargeTitles = true
         setupTableView()
+        setupSearchController()
         setupRefreshUsersControl()
+    }
+    
+    func updateRows(with rows: [GitHubUserCellUIModel]) {
+        self.rows = rows
     }
     
     func endRefreshingAnimation() {
@@ -132,13 +149,34 @@ private extension GitHubUsersListTableViewController {
         let cellKey = String(describing: GitHubUsersListTableViewCell.self)
         let cellNib = UINib(nibName: cellKey, bundle: nil)
         tableView.register(cellNib, forCellReuseIdentifier: cellKey)
-        tableView.rowHeight = 85
+        tableView.separatorColor = .clear
+        tableView.rowHeight = 155
     }
     
     func setupRefreshUsersControl() {
-        let title = Constants.UI.RefreshControl.title
-        refreshUsersControl.attributedTitle = NSAttributedString(string: title)
         refreshUsersControl.addTarget(self, action: #selector(refresh), for: .valueChanged)
         tableView.refreshControl = refreshUsersControl
+    }
+    
+    func setupSearchController() {
+        searchController = UISearchController(searchResultsController: nil)
+        searchController.searchResultsUpdater = self
+        searchController.obscuresBackgroundDuringPresentation = false
+        searchController.searchBar.placeholder = "Search Users"
+        searchController.searchBar.tintColor = .systemPink
+        navigationItem.searchController = searchController
+        definesPresentationContext = true
+    }
+}
+
+
+//MARK: - Search results updating protocol extension
+extension GitHubUsersListTableViewController: UISearchResultsUpdating {
+    
+    //MARK: Internal
+    func updateSearchResults(for searchController: UISearchController) {
+        let searchText = searchController.searchBar.text?.lowercased() ?? ""
+        filteredRows = rows.filter { $0.login.lowercased().contains(searchText) }
+        tableView.reloadData()
     }
 }

@@ -23,9 +23,9 @@ private extension GitHubUsersListPresenter {
 
 //MARK: - Presenter protocol
 protocol GitHubUsersListPresenterProtocol {
-    func onViewDidLoad(completion: @escaping (([GitHubUserCellUIModel]) -> ()))
-    func onDidSelectRow(with login: String)
+    func onViewDidLoad()
     func onRefresh()
+    func onDidSelectRow(with login: String)
 }
 
 
@@ -43,6 +43,7 @@ final class GitHubUsersListPresenter: GitHubUsersListPresenterProtocol {
     private var apiClient: AllGitHubUsersAPIClientProtocol?
     private var delegate: GitHubUsersListPresenterCoordinatorDelegate?
     
+    
     //MARK: Initialization
     init(view: GitHubUsersListTableViewControllerProtocol!,
          delegate: GitHubUsersListPresenterCoordinatorDelegate!) {
@@ -52,17 +53,21 @@ final class GitHubUsersListPresenter: GitHubUsersListPresenterProtocol {
     }
     
     //MARK: Presenter protocol
-    func onViewDidLoad(completion: @escaping (([GitHubUserCellUIModel]) -> ())) {
+    func onViewDidLoad() {
         view?.setupMainUI()
-        setupUsers { dbModels in
-            completion(GitHubUsersListFormatter.format(dbModels))
-            self.view?.refreshTableView()
+        fetchUsers { [weak self] dbModels in
+            self?.reloadUsers(with: dbModels)
         }
     }
 
     func onRefresh() {
-        view?.refreshTableView()
+        let stringURL = URLs.gitHubUsersBaseURL + Int.randomUsersSinceIndex()
+        guard let url = URL(string: stringURL) else { return }
         view?.endRefreshingAnimation()
+        apiClient?.update(with: url)
+        fetchUsers { [weak self] dbModels in
+            self?.reloadUsers(with: dbModels)
+        }
     }
     
     func onDidSelectRow(with login: String) {
@@ -75,7 +80,7 @@ final class GitHubUsersListPresenter: GitHubUsersListPresenterProtocol {
 private extension GitHubUsersListPresenter {
     
     //MARK: Private
-    func setupUsers(completion: @escaping (([GitHubUserDB]) -> ())) {
+    func fetchUsers(completion: @escaping (([GitHubUserDB]) -> ())) {
         Task {
             do {
                 let dbModels = try await apiClient?.getUsers()
@@ -94,5 +99,10 @@ private extension GitHubUsersListPresenter {
         DispatchQueue.main.async {
             self.view?.presentErrorAlertVC(message: message)
         }
+    }
+    
+    func reloadUsers(with dbModels: [GitHubUserDB]) {
+        view?.updateRows(with: GitHubUsersListFormatter.format(dbModels))
+        view?.refreshTableView()
     }
 }

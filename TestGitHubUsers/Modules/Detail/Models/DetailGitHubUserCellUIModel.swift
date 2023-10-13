@@ -10,8 +10,9 @@ import Foundation
 //MARK: - Main UIModel
 struct DetailGitHubUserCellUIModel {
     var login: String!
-    var email: String!
+    var url: String!
     var avatarURL: URL!
-    var followers: Int!
-    var following: Int!
+    var followers: String!
+    var following: String!
+    var gists: String!
 }

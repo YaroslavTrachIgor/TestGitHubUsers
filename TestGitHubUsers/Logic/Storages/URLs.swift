@@ -11,6 +11,7 @@ import Foundation
 public enum URLs {
     
     //MARK: Static
+    static let gitHubUsersBaseURL = "https://api.github.com/users?since="
     static let gitHubUsersURL = "https://api.github.com/users?since=100"
     static let gitHubUserURL = "https://api.github.com/users/"
 }
