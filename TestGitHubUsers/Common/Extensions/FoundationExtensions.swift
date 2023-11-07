@@ -15,3 +15,13 @@ public extension HTTPURLResponse {
         return (200...299).contains(self.statusCode)
     }
 }
+
+
+//MARK: - Fast Int methods
+extension Int {
+    
+    //MARK: Public
+    static func randomUsersSinceIndex() -> String {
+        return "\(Int.random(in: (1...1000)))"
+    }
+}

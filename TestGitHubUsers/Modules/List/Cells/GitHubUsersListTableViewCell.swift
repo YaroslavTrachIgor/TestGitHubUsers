@@ -34,28 +34,14 @@ final class GitHubUsersListTableViewCell: UITableViewCell {
     @IBOutlet weak var followersLabel: UILabel!
     @IBOutlet weak var contentBackColor: UIView! {
         didSet {
-            let tintColors: [UIColor] = [.systemPink, .systemRed, .systemTeal, .link, .systemIndigo, .systemOrange, .systemRed, .systemMint, .purple, .systemGreen]
-            let tintColor = tintColors.randomElement()!
+            let tintColor = UIColor.randomTintColors.randomElement()!
             let gradientLayer = CAGradientLayer()
             contentBackColor.addShadow(
                 offset: CGSize(width: 0, height: 5),
                 color: tintColor.withAlphaComponent(0.5),
                 radius: 6
             )
-            gradientLayer.frame = CGRect(
-                x: 0,
-                y: 0,
-                width: contentBackColor.frame.width + 74,
-                height: contentBackColor.frame.height - 6
-            )
-            gradientLayer.colors = [
-                tintColor.withAlphaComponent(1.0).cgColor,
-                tintColor.withAlphaComponent(0.6).cgColor
-            ]
-            gradientLayer.startPoint = CGPoint(x: 0.0, y: 0.5)
-            gradientLayer.endPoint = CGPoint(x: 1.0, y: 0.5)
-            gradientLayer.cornerRadius = 25
-            
+            contentBackColor.addGradient(tintColor: tintColor)
             contentBackColor.backgroundColor = .clear
             contentBackColor.layer.insertSublayer(gradientLayer, at: 0)
         }
@@ -66,28 +52,5 @@ final class GitHubUsersListTableViewCell: UITableViewCell {
         super.awakeFromNib()
         
         backgroundColor = .systemGroupedBackground
-    }
-}
-
-
-extension UIView {
-    func addShadow(
-        offset: CGSize = CGSize(width: 0, height: 2),
-        color: UIColor = .black,
-        radius: CGFloat = 4,
-        opacity: Float = 1
-    ) {
-        layer.shadowOffset = offset
-        layer.shadowColor = color.cgColor
-        layer.shadowRadius = radius
-        layer.shadowOpacity = opacity
-        layer.masksToBounds = false
-    }
-}
-
-
-extension Int {
-    static func randomUsersSinceIndex() -> String {
-        return "\(Int.random(in: (1...1000)))"
     }
 }
